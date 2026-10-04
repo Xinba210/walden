@@ -1,0 +1,48 @@
+{
+ "fps": 30,
+ "clips": {
+  "Idle": {
+   "speed": 0.0017,
+   "frames": 41
+  },
+  "Walk": {
+   "speed": 0.088,
+   "frames": 41
+  },
+  "AttackClaw": {
+   "frames": 55
+  },
+  "AttackHook": {
+   "frames": 15
+  },
+  "HitReact": {
+   "frames": 11
+  },
+  "Death": {
+   "frames": 73
+  }
+ },
+ "attacks": {
+  "AttackClaw": {
+   "frames": 55,
+   "hand": "Right",
+   "peak": 0.6,
+   "strike": [
+    0.5333,
+    0.6667
+   ],
+   "peakSpeed": 54.26
+  },
+  "AttackHook": {
+   "frames": 15,
+   "hand": "Right",
+   "peak": 0.2667,
+   "strike": [
+    0.1667,
+    0.3
+   ],
+   "peakSpeed": 71.62
+  }
+ },
+ "height": 4.6
+}

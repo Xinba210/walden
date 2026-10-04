@@ -1,0 +1,56 @@
+# Only the game and the scripts that build its assets are tracked. Everything else in this folder is local working
+# data: source models (Tripo exports, animation packs), Blender intermediates, renders, old experiments.
+/*
+!/.gitignore
+!/README.md
+!/.github/
+!/game/
+!/scripts/
+!/build_ha.sh
+!/build_sg.sh
+!/build_monster.sh
+
+# node / vite
+node_modules/
+dist/
+.vite/
+
+# editor / tooling
+.claude/
+.vscode/
+.idea/
+*.log
+.DS_Store
+__pycache__/
+*.pyc
+
+# game: legacy code and assets no longer used by the build
+/game/src/world/
+/game/src/clothSim.js
+/game/src/edgeWobble.js
+/game/src/dummies.js
+/game/src/clipMeta_*.json
+/game/w2-*.html
+/game/src/world2/test_*.js
+/game/public/tex/gen/
+/game/public/models/*
+!/game/public/models/ninja.glb
+!/game/public/models/monster.glb
+!/game/public/models/world2/
+/game/scripts/cloth_bake.mjs
+
+# scripts: only the current character / monster / world pipeline
+/scripts/*
+!/scripts/ha_prep.py
+!/scripts/ha_rig.py
+!/scripts/regions.py
+!/scripts/sg_prep.py
+!/scripts/game_build.py
+!/scripts/world2/
+/scripts/world2/previews/
+/scripts/world2/reference.webp
+/game/scripts/cloth_*.mjs
+/game/scripts/clothgrid.mjs
+/game/scripts/probe.mjs
+/game/scripts/shot.mjs
+/game/scripts/sprint_test.mjs

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Walden</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet" />
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; background: #1b1d3e; font-family: "Segoe UI", system-ui, sans-serif; }
+      #app canvas { display: block; }
+      #overlay { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: radial-gradient(ellipse at 50% 70%, rgba(255,150,70,0.4), rgba(40,22,48,0.94) 60%); color: #fff0e0; cursor: pointer; transition: opacity 0.5s; z-index: 10; user-select: none; }
+      #overlay.hidden { opacity: 0; pointer-events: none; }
+      #overlay h1 { font-weight: 300; letter-spacing: 0.6em; margin: 0 0 0.3em; text-shadow: 0 0 22px #ffa860; }
+      #overlay p { opacity: 0.8; margin: 0.2em; }
+      #progress { width: 240px; height: 2px; background: #2a2b5a; margin-top: 18px; }
+      #progress div { height: 100%; width: 0; background: #ffb070; box-shadow: 0 0 10px #ffb070; transition: width 0.2s; }
+      /* ---- in-game UI (souls-like: minimal, framed, fades when not needed) ---- */
+      :root { --ui-gold: rgba(214, 190, 140, 0.55); --ui-gold-dim: rgba(214, 190, 140, 0.25); --ui-ink: rgba(8, 7, 10, 0.62); }
+      .hpbar { position: relative; height: 9px; background: var(--ui-ink); border: 1px solid var(--ui-gold);
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35); }
+      .hpbar::before, .hpbar::after { content: ""; position: absolute; top: 50%; width: 7px; height: 7px; background: #1a1612;
+        border: 1px solid var(--ui-gold); transform: translateY(-50%) rotate(45deg); }
+      .hpbar::before { left: -6px; } .hpbar::after { right: -6px; }
+      .hpbar i, .hpbar s { position: absolute; left: 1px; top: 1px; bottom: 1px; width: calc(100% - 2px); transform-origin: left; }
+      .hpbar s { background: linear-gradient(180deg, #f3e2b8, #c9a86a); opacity: 0.8; }
+      .hpbar i { background: linear-gradient(180deg, #d4434a 0%, #a51f27 55%, #7c1219 100%); }
+      #hud-player { position: fixed; left: 34px; top: 30px; width: min(30vw, 330px); pointer-events: none; z-index: 5; transition: opacity 0.8s; }
+      #hud-player .hpbar { height: 8px; }
+      #boss { position: fixed; left: 50%; bottom: 58px; width: min(62vw, 760px); transform: translateX(-50%); pointer-events: none; z-index: 5;
+        opacity: 0; transition: opacity 0.9s; }
+      #boss.on { opacity: 1; }
+      #boss .name { font: 500 15px/1 "Cinzel", "Trajan Pro", Georgia, serif; letter-spacing: 0.12em; color: #efe4cc;
+        text-shadow: 0 1px 4px #000, 0 0 12px rgba(0, 0, 0, 0.6); margin: 0 0 7px 2px; }
+      #boss .hpbar { height: 7px; }
+      #boss .hpbar i { background: linear-gradient(180deg, #b8323a 0%, #8a1820 60%, #5e0d13 100%); }
+      #defeat { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;
+        opacity: 0; transition: opacity 1.6s; z-index: 6; background: linear-gradient(180deg, transparent 38%, rgba(0, 0, 0, 0.55) 48%, rgba(0, 0, 0, 0.55) 56%, transparent 66%); }
+      #defeat.on { opacity: 1; }
+      #defeat h2 { margin: 0; font: 500 64px/1 "Cinzel", Georgia, serif; letter-spacing: 0.16em; color: #9e1b22; text-shadow: 0 0 24px rgba(160, 20, 30, 0.45); }
+      #defeat p { margin: 14px 0 0; font: 500 13px "Cinzel", Georgia, serif; letter-spacing: 0.25em; color: #d9cdb4; opacity: 0.85; }
+      #defeat kbd { font: inherit; border: 1px solid var(--ui-gold); padding: 0 6px; margin: 0 2px; }
+      #help { position: fixed; left: 34px; bottom: 30px; color: #ece3cf; font: 13px/1.75 Georgia, serif; background: rgba(10, 9, 12, 0.6);
+        padding: 12px 18px; border: 1px solid var(--ui-gold-dim); pointer-events: none; z-index: 5; opacity: 0; transition: opacity 0.4s; }
+      #help.on { opacity: 1; }
+      #help b { font: 500 11px/1 "Cinzel", Georgia, serif; letter-spacing: 0.12em; color: #d8bf88; display: inline-block; min-width: 104px; }
+      #hint { position: fixed; left: 34px; bottom: 30px; font: 500 11px "Cinzel", Georgia, serif; letter-spacing: 0.18em; color: #e8dcc0;
+        opacity: 0; transition: opacity 1.2s; pointer-events: none; z-index: 5; text-shadow: 0 1px 3px #000; }
+      #hint.on { opacity: 0.55; }
+      #state { position: fixed; right: 16px; top: 12px; color: #dcd; font: 12px monospace; opacity: 0.8; z-index: 5; white-space: pre; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <div id="overlay"><h1>WALDEN</h1><p id="loading">Loading…</p><div id="progress"><div></div></div></div>
+    <div id="hud-player"><div class="hpbar"><s></s><i></i></div></div>
+    <div id="boss"><div class="name">Forest Wraith</div><div class="hpbar"><s></s><i></i></div></div>
+    <div id="defeat"><h2>DEFEATED</h2><p>press <kbd>R</kbd> to rise again</p></div>
+    <div id="hint">F1 &nbsp;controls</div>
+    <div id="help">
+      <div><b>W A S D</b> move</div>
+      <div><b>Shift</b> run · hold to sprint</div>
+      <div><b>Space</b> jump</div>
+      <div><b>C</b> dodge roll</div>
+      <div><b>E</b> draw / sheathe katana</div>
+      <div><b>Left click</b> slash combo</div>
+      <div><b>Right click</b> dash slash</div>
+      <div><b>Mouse · Wheel</b> look · zoom</div>
+      <div><b>M</b> music &nbsp; <b style="min-width:0">H</b> debug</div>
+    </div>
+    <div id="state"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
